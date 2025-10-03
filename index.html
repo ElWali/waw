@@ -1,65 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-  <meta charset="utf-8" />
-  <title>خريطة ESRI مع تمرير بين الطبقات</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- مكتبة Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/mi8p5AUQBlqhl7Huc8="
-        crossorigin=""/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-        crossorigin=""></script>
-
-  <!-- مكتبة Esri Leaflet -->
-  <script src="https://unpkg.com/esri-leaflet@3.0.17"></script>
-
-  <!-- مكتبة التمرير الجانبي (Side by Side) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-side-by-side@1.0.0/leaflet-side-by-side.css" />
-  <script src="https://unpkg.com/leaflet-side-by-side@1.0.0/leaflet-side-by-side.js"></script>
-
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      font-family: Arial, sans-serif;
-      direction: rtl; /* دعم النصوص من اليمين لليسار */
-    }
-    #map {
-      width: 100%;
-      height: 100%;
-    }
-    .leaflet-control-attribution {
-      font-size: 12px;
-    }
-  </style>
-</head>
-<body>
-  <div id="map"></div>
-
-  <script>
-    // إنشاء الخريطة وضبط الإحداثيات والزوم
-    var map = L.map('map', {
-      zoomControl: true
-    }).setView([30, 35], 4); // بداية: شبه الجزيرة العربية
-
-    // طبقة الأقمار الصناعية
-    var satellite = L.esri.basemapLayer('Imagery');
-
-    // طبقة التضاريس
-    var topo = L.esri.basemapLayer('Topographic');
-
-    // أداة التمرير الجانبي للمقارنة بين الطبقتين
-    L.control.sideBySide(satellite, topo).addTo(map);
-
-    // إضافة شريط مقياس أسفل الخريطة
-    L.control.scale({ position: 'bottomleft', imperial: false }).addTo(map);
-
-    // رسالة ترحيب في الكونسول
-    console.log("🚀 الخريطة جاهزة! اسحب الشريط الأبيض لمقارنة الطبقات.");
-  </script>
-</body>
-</html>
