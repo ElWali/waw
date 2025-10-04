@@ -1,11 +1,22 @@
 /* Atlas.js is a lightweight JavaScript library for mobile-friendly interactive maps 🇲🇦 */
 /*  © ElWali */
+/*
+  This is a modern build of Atlas.js, optimized for recent browser versions.
+  It removes polyfills and code for legacy browsers like Internet Explorer,
+  resulting in a smaller file size and better performance.
+
+  Supported browsers:
+  - Chrome 90+
+  - Firefox 88+
+  - Safari 14+
+  - Edge 90+
+*/
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.atlas = {}));
 })(this, (function (exports) { 'use strict';
-  var version = "0.0.1";
+  var version = "0.0.1-modern";
   function extend(dest) {
 	var i, j, len, src;
 	for (j = 1, len = arguments.length; j < len; j++) {
@@ -16,13 +27,7 @@
 	}
 	return dest;
   }
-  var create$2 = Object.create || (function () {
-	function F() {}
-	return function (proto) {
-		F.prototype = proto;
-		return new F();
-	};
-  })();
+  var create$2 = Object.create;
   function bind(fn, obj) {
 	var slice = Array.prototype.slice;
 	if (fn.bind) {
@@ -73,7 +78,7 @@
 	return Math.round(num * pow) / pow;
   }
   function trim(str) {
-	return str.trim ? str.trim() : str.replace(/^\s+|\s+$/g, '');
+	return str.trim();
   }
   function splitWords(str) {
 	return trim(str).split(/\s+/);
@@ -106,9 +111,7 @@
 		return value;
 	});
   }
-  var isArray = Array.isArray || function (obj) {
-	return (Object.prototype.toString.call(obj) === '[object Array]');
-  };
+  var isArray = Array.isArray;
   function indexOf(array, el) {
 	for (var i = 0; i < array.length; i++) {
 		if (array[i] === el) { return i; }
@@ -431,11 +434,6 @@
 		}
 	}
   };
-  Events.addEventListener = Events.on;
-  Events.removeEventListener = Events.clearAllEventListeners = Events.off;
-  Events.addOneTimeEventListener = Events.once;
-  Events.fireEvent = Events.fire;
-  Events.hasEventListeners = Events.listens;
   var Evented = Class.extend(Events);
   function Point(x, y, round) {
 	this.x = (round ? Math.round(x) : x);
@@ -1013,22 +1011,15 @@
 	return str || 'M0 0';
   }
   var style = document.documentElement.style;
-  var ie = 'ActiveXObject' in window;
-  var ielt9 = ie && !document.addEventListener;
   var edge = 'msLaunchUri' in navigator && !('documentMode' in document);
   var webkit = userAgentContains('webkit');
   var android = userAgentContains('android');
-  var android23 = userAgentContains('android 2') || userAgentContains('android 3');
   var webkitVer = parseInt(/WebKit\/([0-9]+)|$/.exec(navigator.userAgent)[1], 10);
-  var androidStock = android && userAgentContains('Google') && webkitVer < 537 && !('AudioNode' in window);
-  var opera = !!window.opera;
   var chrome = !edge && userAgentContains('chrome');
-  var gecko = userAgentContains('gecko') && !webkit && !opera && !ie;
+  var gecko = userAgentContains('gecko') && !webkit && !ie;
   var safari = !chrome && userAgentContains('safari');
-  var phantom = userAgentContains('phantom');
-  var opera12 = 'OTransition' in style;
   var win = navigator.platform.indexOf('Win') === 0;
-  var ie3d = ie && ('transition' in style);
+  var ie3d = ('transition' in style);
   var webkit3d = ('WebKitCSSMatrix' in window) && ('m11' in new window.WebKitCSSMatrix()) && !android23;
   var gecko3d = 'MozPerspective' in style;
   var any3d = !window.ATLAS_DISABLE_3D && (ie3d || webkit3d || gecko3d) && !opera12 && !phantom;
@@ -1065,36 +1056,18 @@
 	div.innerHTML = '<svg/>';
 	return (div.firstChild && div.firstChild.namespaceURI) === 'http://www.w3.org/2000/svg';
   })();
-  var vml = !svg$1 && (function () {
-	try {
-		var div = document.createElement('div');
-		div.innerHTML = '<v:shape adj="1"/>';
-		var shape = div.firstChild;
-		shape.style.behavior = 'url(#default#VML)';
-		return shape && (typeof shape.adj === 'object');
-	} catch (e) {
-		return false;
-	}
-  }());
   var mac = navigator.platform.indexOf('Mac') === 0;
   var linux = navigator.platform.indexOf('Linux') === 0;
   function userAgentContains(str) {
 	return navigator.userAgent.toLowerCase().indexOf(str) >= 0;
   }
   var Browser = {
-	ie: ie,
-	ielt9: ielt9,
 	edge: edge,
 	webkit: webkit,
 	android: android,
-	android23: android23,
-	androidStock: androidStock,
-	opera: opera,
 	chrome: chrome,
 	gecko: gecko,
 	safari: safari,
-	phantom: phantom,
-	opera12: opera12,
 	win: win,
 	ie3d: ie3d,
 	webkit3d: webkit3d,
@@ -1113,83 +1086,10 @@
 	passiveEvents: passiveEvents,
 	canvas: canvas$1,
 	svg: svg$1,
-	vml: vml,
 	inlineSvg: inlineSvg,
 	mac: mac,
 	linux: linux
   };
-  var POINTER_DOWN =   Browser.msPointer ? 'MSPointerDown'   : 'pointerdown';
-  var POINTER_MOVE =   Browser.msPointer ? 'MSPointerMove'   : 'pointermove';
-  var POINTER_UP =     Browser.msPointer ? 'MSPointerUp'     : 'pointerup';
-  var POINTER_CANCEL = Browser.msPointer ? 'MSPointerCancel' : 'pointercancel';
-  var pEvent = {
-	touchstart  : POINTER_DOWN,
-	touchmove   : POINTER_MOVE,
-	touchend    : POINTER_UP,
-	touchcancel : POINTER_CANCEL
-  };
-  var handle = {
-	touchstart  : _onPointerStart,
-	touchmove   : _handlePointer,
-	touchend    : _handlePointer,
-	touchcancel : _handlePointer
-  };
-  var _pointers = {};
-  var _pointerDocListener = false;
-  function addPointerListener(obj, type, handler) {
-	if (type === 'touchstart') {
-		_addPointerDocListener();
-	}
-	if (!handle[type]) {
-		console.warn('wrong event specified:', type);
-		return falseFn;
-	}
-	handler = handle[type].bind(this, handler);
-	obj.addEventListener(pEvent[type], handler, false);
-	return handler;
-  }
-  function removePointerListener(obj, type, handler) {
-	if (!pEvent[type]) {
-		console.warn('wrong event specified:', type);
-		return;
-	}
-	obj.removeEventListener(pEvent[type], handler, false);
-  }
-  function _globalPointerDown(e) {
-	_pointers[e.pointerId] = e;
-  }
-  function _globalPointerMove(e) {
-	if (_pointers[e.pointerId]) {
-		_pointers[e.pointerId] = e;
-	}
-  }
-  function _globalPointerUp(e) {
-	delete _pointers[e.pointerId];
-  }
-  function _addPointerDocListener() {
-	if (!_pointerDocListener) {
-		document.addEventListener(POINTER_DOWN, _globalPointerDown, true);
-		document.addEventListener(POINTER_MOVE, _globalPointerMove, true);
-		document.addEventListener(POINTER_UP, _globalPointerUp, true);
-		document.addEventListener(POINTER_CANCEL, _globalPointerUp, true);
-		_pointerDocListener = true;
-	}
-  }
-  function _handlePointer(handler, e) {
-	if (e.pointerType === (e.MSPOINTER_TYPE_MOUSE || 'mouse')) { return; }
-	e.touches = [];
-	for (var i in _pointers) {
-		e.touches.push(_pointers[i]);
-	}
-	e.changedTouches = [e];
-	handler(e);
-  }
-  function _onPointerStart(handler, e) {
-	if (e.MSPOINTER_TYPE_TOUCH && e.pointerType === e.MSPOINTER_TYPE_TOUCH) {
-		preventDefault(e);
-	}
-	_handlePointer(handler, e);
-  }
   function makeDblclick(event) {
 	var newEvent = {},
 	    prop, i;
@@ -1339,27 +1239,7 @@
 	return el.className.baseVal === undefined ? el.className : el.className.baseVal;
   }
   function setOpacity(el, value) {
-	if ('opacity' in el.style) {
-		el.style.opacity = value;
-	} else if ('filter' in el.style) {
-		_setOpacityIE(el, value);
-	}
-  }
-  function _setOpacityIE(el, value) {
-	var filter = false,
-	    filterName = 'DXImageTransform.Microsoft.Alpha';
-	try {
-		filter = el.filters.item(filterName);
-	} catch (e) {
-		if (value === 1) { return; }
-	}
-	value = Math.round(value * 100);
-	if (filter) {
-		filter.Enabled = (value !== 100);
-		filter.Opacity = value;
-	} else {
-		el.style.filter += ' progid:' + filterName + '(opacity=' + value + ')';
-	}
+	el.style.opacity = value;
   }
   function testProp(props) {
 	var style = document.documentElement.style;
@@ -1543,9 +1423,8 @@
 		return fn.call(context || obj, e || window.event);
 	};
 	var originalHandler = handler;
-	if (!Browser.touchNative && Browser.pointer && type.indexOf('touch') === 0) {
-		handler = addPointerListener(obj, type, handler);
-	} else if (Browser.touch && (type === 'dblclick')) {
+	// MSPointer support removed - modern browsers only
+	if (Browser.touch && (type === 'dblclick')) {
 		handler = addDoubleTapListener(obj, handler);
 	} else if ('addEventListener' in obj) {
 		if (type === 'touchstart' || type === 'touchmove' || type === 'wheel' ||  type === 'mousewheel') {
@@ -1561,8 +1440,6 @@
 		} else {
 			obj.addEventListener(type, originalHandler, false);
 		}
-	} else {
-		obj.attachEvent('on' + type, handler);
 	}
 	obj[eventsKey] = obj[eventsKey] || {};
 	obj[eventsKey][id] = handler;
@@ -1577,8 +1454,6 @@
 		removeDoubleTapListener(obj, handler);
 	} else if ('removeEventListener' in obj) {
 		obj.removeEventListener(mouseSubst[type] || type, handler, false);
-	} else {
-		obj.detachEvent('on' + type, handler);
 	}
 	obj[eventsKey][id] = null;
   }
@@ -6393,7 +6268,6 @@
 	},
 	_updateOpacity: function () {
 		if (!this._map) { return; }
-		if (Browser.ielt9) { return; }
 		setOpacity(this._container, this.options.opacity);
 		var now = +new Date(),
 		    nextFrame = false,
@@ -6751,9 +6625,6 @@
 		tile.style.height = tileSize.y + 'px';
 		tile.onselectstart = falseFn;
 		tile.onmousemove = falseFn;
-		if (Browser.ielt9 && this.options.opacity < 1) {
-			setOpacity(tile, this.options.opacity);
-		}
 	},
 	_addTile: function (coords, container) {
 		var tilePos = this._getTilePos(coords),
@@ -6805,7 +6676,7 @@
 		if (this._noTilesToLoad()) {
 			this._loading = false;
 			this.fire('load');
-			if (Browser.ielt9 || !this._map._fadeAnimated) {
+			if (!this._map._fadeAnimated) {
 				requestAnimFrame(this._pruneTiles, this);
 			} else {
 				setTimeout(bind(this._pruneTiles, this), 250);
@@ -6916,11 +6787,7 @@
 		return template(this._url, extend(data, this.options));
 	},
 	_tileOnLoad: function (done, tile) {
-		if (Browser.ielt9) {
-			setTimeout(bind(done, this, null, tile), 0);
-		} else {
-			done(null, tile);
-		}
+		done(null, tile);
 	},
 	_tileOnError: function (done, tile, e) {
 		var errorUrl = this.options.errorTileUrl;
@@ -7457,107 +7324,7 @@
   function canvas(options) {
 	return Browser.canvas ? new Canvas(options) : null;
   }
-  var vmlCreate = (function () {
-	try {
-		document.namespaces.add('lvml', 'urn:schemas-microsoft-com:vml');
-		return function (name) {
-			return document.createElement('<lvml:' + name + ' class="lvml">');
-		};
-	} catch (e) {
-	}
-	return function (name) {
-		return document.createElement('<' + name + ' xmlns="urn:schemas-microsoft.com:vml" class="lvml">');
-	};
-  })();
-  var vmlMixin = {
-	_initContainer: function () {
-		this._container = create$1('div', 'atlas-vml-container');
-	},
-	_update: function () {
-		if (this._map._animatingZoom) { return; }
-		Renderer.prototype._update.call(this);
-		this.fire('update');
-	},
-	_initPath: function (layer) {
-		var container = layer._container = vmlCreate('shape');
-		addClass(container, 'atlas-vml-shape ' + (this.options.className || ''));
-		container.coordsize = '1 1';
-		layer._path = vmlCreate('path');
-		container.appendChild(layer._path);
-		this._updateStyle(layer);
-		this._layers[stamp(layer)] = layer;
-	},
-	_addPath: function (layer) {
-		var container = layer._container;
-		this._container.appendChild(container);
-		if (layer.options.interactive) {
-			layer.addInteractiveTarget(container);
-		}
-	},
-	_removePath: function (layer) {
-		var container = layer._container;
-		remove(container);
-		layer.removeInteractiveTarget(container);
-		delete this._layers[stamp(layer)];
-	},
-	_updateStyle: function (layer) {
-		var stroke = layer._stroke,
-		    fill = layer._fill,
-		    options = layer.options,
-		    container = layer._container;
-		container.stroked = !!options.stroke;
-		container.filled = !!options.fill;
-		if (options.stroke) {
-			if (!stroke) {
-				stroke = layer._stroke = vmlCreate('stroke');
-			}
-			container.appendChild(stroke);
-			stroke.weight = options.weight + 'px';
-			stroke.color = options.color;
-			stroke.opacity = options.opacity;
-			if (options.dashArray) {
-				stroke.dashStyle = isArray(options.dashArray) ?
-				    options.dashArray.join(' ') :
-				    options.dashArray.replace(/( *, *)/g, ' ');
-			} else {
-				stroke.dashStyle = '';
-			}
-			stroke.endcap = options.lineCap.replace('butt', 'flat');
-			stroke.joinstyle = options.lineJoin;
-		} else if (stroke) {
-			container.removeChild(stroke);
-			layer._stroke = null;
-		}
-		if (options.fill) {
-			if (!fill) {
-				fill = layer._fill = vmlCreate('fill');
-			}
-			container.appendChild(fill);
-			fill.color = options.fillColor || options.color;
-			fill.opacity = options.fillOpacity;
-		} else if (fill) {
-			container.removeChild(fill);
-			layer._fill = null;
-		}
-	},
-	_updateCircle: function (layer) {
-		var p = layer._point.round(),
-		    r = Math.round(layer._radius),
-		    r2 = Math.round(layer._radiusY || r);
-		this._setPath(layer, layer._empty() ? 'M0 0' :
-			'AL ' + p.x + ',' + p.y + ' ' + r + ',' + r2 + ' 0,' + (65535 * 360));
-	},
-	_setPath: function (layer, path) {
-		layer._path.v = path;
-	},
-	_bringToFront: function (layer) {
-		toFront(layer._container);
-	},
-	_bringToBack: function (layer) {
-		toBack(layer._container);
-	}
-  };
-  var create = Browser.vml ? vmlCreate : svgCreate;
+  var create = svgCreate;
   var SVG = Renderer.extend({
 	_initContainer: function () {
 		this._container = create('svg');
@@ -7667,9 +7434,6 @@
 		toBack(layer._path);
 	}
   });
-  if (Browser.vml) {
-	SVG.include(vmlMixin);
-  }
   function svg(options) {
 	return Browser.svg || Browser.vml ? new SVG(options) : null;
   }
